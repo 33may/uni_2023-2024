@@ -1,0 +1,411 @@
+(declare-fun Tower(Int Int Int)Int)
+(declare-fun disks(Int Int) Int)
+;;Start State
+(assert
+    (and
+        (=
+            (disks 1 0)
+            4
+        )
+        (=
+            (disks 2 0)
+            0
+        )
+        (=
+            (disks 3 0)
+            0
+        )
+        (=
+            (Tower 1 1 0)
+            4
+        )
+        (=
+            (Tower 1 2 0)
+            3
+        )
+        (=
+            (Tower 1 3 0)
+            2
+        )
+        (=
+            (Tower 1 4 0)
+            1
+        )
+        (forall ((t Int) (p Int))
+            (implies
+                (and
+                    (<= 2 t 3)
+                    (<= 1 p 4)
+                )
+                (=
+                    (Tower t p 0)
+                    0
+                )
+            )
+        )
+    )
+)
+;;End State
+(assert
+    (and
+        (=
+            (disks 1 15)
+            0
+        )
+        (=
+            (disks 2 15)
+            0
+        )
+        (=
+            (disks 3 15)
+            4
+        )
+        (=
+            (Tower 3 1 15)
+            4
+        )
+        (=
+            (Tower 3 2 15)
+            3
+        )
+        (=
+            (Tower 3 3 15)
+            2
+        )
+        (=
+            (Tower 3 4 15)
+            1
+        )
+        (forall ((t Int) (p Int))
+            (implies
+                (and
+                    (<= 1 t 2)
+                    (<= 1 p 4)
+                )
+                (=
+                    (Tower t p 15)
+                    0
+                )
+            )
+        )
+    )
+)
+(define-fun move((t1 Int) (t2 Int) (t3 Int) (m Int)) Bool
+    (and
+        (=
+            (disks t1 (+ m 1))
+            (-
+                (disks t1 m)
+                1
+            )
+        )
+        (=
+            (disks t2 (+ m 1))
+            (+
+                (disks t2 m)
+                1
+            )
+        )
+        (=
+            (disks t3 (+ m 1))
+            (disks t3 m)
+        )
+        (<
+            (Tower t1 (disks t1 m) m)
+            (Tower t2 (disks t2 m) m)
+        )
+        (forall ((p Int))
+            (implies
+                (<= 1 p 4)
+                (and
+                    (=
+                        (Tower t1 p (+ m 1))
+                        (ite
+                            (= p (disks t1 m))
+                            0
+                            (Tower t1 p m)
+                        )
+                    )
+                    (=
+                        (Tower t2 p (+ m 1))
+                        (ite
+                            (= p (disks t2 (+ m 1)))
+                            (Tower t1 (disks t1 m) m)
+                            (Tower t2 p m)
+                        )
+                    )
+                    (=
+                        (Tower t3 p m)
+                        (Tower t3 p (+ m 1))
+                    )
+                )
+            )
+        )
+    )
+)
+(assert
+    (forall ((t Int) (m Int))
+        (implies
+            (and
+                (<= 1 t 3)
+                (<= 0 m 14)
+            )
+            (<= 0 (disks t m) 4)
+        )
+    )
+)
+(assert (forall ((i Int))
+    (implies 
+        (<= 0 i 14)
+        (exists ((t1 Int) (t2 Int) (t3 Int))
+            (and
+                (<= 1 t1 3)
+                (<= 1 t2 3)
+                (<= 1 t3 3)
+                (distinct t1 t2 t3)
+                (move t1 t2 t3 i)
+            )
+        )
+    )
+))
+(check-sat)
+(echo "Step 0:")
+(get-value(
+    (Tower 1 1 0)
+    (Tower 1 2 0)
+    (Tower 1 3 0)
+    (Tower 1 4 0)
+    (Tower 2 1 0)
+    (Tower 2 2 0)
+    (Tower 2 3 0)
+    (Tower 2 4 0)
+    (Tower 3 1 0)
+    (Tower 3 2 0)
+    (Tower 3 3 0)
+    (Tower 3 4 0)
+))
+(echo "Step 1:")
+(get-value(
+    (Tower 1 1 1)
+    (Tower 1 2 1)
+    (Tower 1 3 1)
+    (Tower 1 4 1)
+    (Tower 2 1 1)
+    (Tower 2 2 1)
+    (Tower 2 3 1)
+    (Tower 2 4 1)
+    (Tower 3 1 1)
+    (Tower 3 2 1)
+    (Tower 3 3 1)
+    (Tower 3 4 1)
+))
+(echo "Step 2:")
+(get-value(
+    (Tower 1 1 2)
+    (Tower 1 2 2)
+    (Tower 1 3 2)
+    (Tower 1 4 2)
+    (Tower 2 1 2)
+    (Tower 2 2 2)
+    (Tower 2 3 2)
+    (Tower 2 4 2)
+    (Tower 3 1 2)
+    (Tower 3 2 2)
+    (Tower 3 3 2)
+    (Tower 3 4 2)
+))
+(echo "Step 3:")
+(get-value(
+    (Tower 1 1 3)
+    (Tower 1 2 3)
+    (Tower 1 3 3)
+    (Tower 1 4 3)
+    (Tower 2 1 3)
+    (Tower 2 2 3)
+    (Tower 2 3 3)
+    (Tower 2 4 3)
+    (Tower 3 1 3)
+    (Tower 3 2 3)
+    (Tower 3 3 3)
+    (Tower 3 4 3)
+))
+(echo "Step 4:")
+(get-value(
+    (Tower 1 1 4)
+    (Tower 1 2 4)
+    (Tower 1 3 4)
+    (Tower 1 4 4)
+    (Tower 2 1 4)
+    (Tower 2 2 4)
+    (Tower 2 3 4)
+    (Tower 2 4 4)
+    (Tower 3 1 4)
+    (Tower 3 2 4)
+    (Tower 3 3 4)
+    (Tower 3 4 4)
+))
+(echo "Step 5:")
+(get-value(
+    (Tower 1 1 5)
+    (Tower 1 2 5)
+    (Tower 1 3 5)
+    (Tower 1 4 5)
+    (Tower 2 1 5)
+    (Tower 2 2 5)
+    (Tower 2 3 5)
+    (Tower 2 4 5)
+    (Tower 3 1 5)
+    (Tower 3 2 5)
+    (Tower 3 3 5)
+    (Tower 3 4 5)
+))
+(echo "Step 6:")
+(get-value(
+    (Tower 1 1 6)
+    (Tower 1 2 6)
+    (Tower 1 3 6)
+    (Tower 1 4 6)
+    (Tower 2 1 6)
+    (Tower 2 2 6)
+    (Tower 2 3 6)
+    (Tower 2 4 6)
+    (Tower 3 1 6)
+    (Tower 3 2 6)
+    (Tower 3 3 6)
+    (Tower 3 4 6)
+))
+(echo "Step 7:")
+(get-value(
+    (Tower 1 1 7)
+    (Tower 1 2 7)
+    (Tower 1 3 7)
+    (Tower 1 4 7)
+    (Tower 2 1 7)
+    (Tower 2 2 7)
+    (Tower 2 3 7)
+    (Tower 2 4 7)
+    (Tower 3 1 7)
+    (Tower 3 2 7)
+    (Tower 3 3 7)
+    (Tower 3 4 7)
+))
+(echo "Step 8:")
+(get-value(
+    (Tower 1 1 8)
+    (Tower 1 2 8)
+    (Tower 1 3 8)
+    (Tower 1 4 8)
+    (Tower 2 1 8)
+    (Tower 2 2 8)
+    (Tower 2 3 8)
+    (Tower 2 4 8)
+    (Tower 3 1 8)
+    (Tower 3 2 8)
+    (Tower 3 3 8)
+    (Tower 3 4 8)
+))
+(echo "Step 9:")
+(get-value(
+    (Tower 1 1 9)
+    (Tower 1 2 9)
+    (Tower 1 3 9)
+    (Tower 1 4 9)
+    (Tower 2 1 9)
+    (Tower 2 2 9)
+    (Tower 2 3 9)
+    (Tower 2 4 9)
+    (Tower 3 1 9)
+    (Tower 3 2 9)
+    (Tower 3 3 9)
+    (Tower 3 4 9)
+))
+(echo "Step 10:")
+(get-value(
+    (Tower 1 1 10)
+    (Tower 1 2 10)
+    (Tower 1 3 10)
+    (Tower 1 4 10)
+    (Tower 2 1 10)
+    (Tower 2 2 10)
+    (Tower 2 3 10)
+    (Tower 2 4 10)
+    (Tower 3 1 10)
+    (Tower 3 2 10)
+    (Tower 3 3 10)
+    (Tower 3 4 10)
+))
+(echo "Step 11:")
+(get-value(
+    (Tower 1 1 11)
+    (Tower 1 2 11)
+    (Tower 1 3 11)
+    (Tower 1 4 11)
+    (Tower 2 1 11)
+    (Tower 2 2 11)
+    (Tower 2 3 11)
+    (Tower 2 4 11)
+    (Tower 3 1 11)
+    (Tower 3 2 11)
+    (Tower 3 3 11)
+    (Tower 3 4 11)
+))
+(echo "Step 12:")
+(get-value(
+    (Tower 1 1 12)
+    (Tower 1 2 12)
+    (Tower 1 3 12)
+    (Tower 1 4 12)
+    (Tower 2 1 12)
+    (Tower 2 2 12)
+    (Tower 2 3 12)
+    (Tower 2 4 12)
+    (Tower 3 1 12)
+    (Tower 3 2 12)
+    (Tower 3 3 12)
+    (Tower 3 4 12)
+))
+(echo "Step 13:")
+(get-value(
+    (Tower 1 1 13)
+    (Tower 1 2 13)
+    (Tower 1 3 13)
+    (Tower 1 4 13)
+    (Tower 2 1 13)
+    (Tower 2 2 13)
+    (Tower 2 3 13)
+    (Tower 2 4 13)
+    (Tower 3 1 13)
+    (Tower 3 2 13)
+    (Tower 3 3 13)
+    (Tower 3 4 13)
+))
+(echo "Step 14:")
+(get-value(
+    (Tower 1 1 14)
+    (Tower 1 2 14)
+    (Tower 1 3 14)
+    (Tower 1 4 14)
+    (Tower 2 1 14)
+    (Tower 2 2 14)
+    (Tower 2 3 14)
+    (Tower 2 4 14)
+    (Tower 3 1 14)
+    (Tower 3 2 14)
+    (Tower 3 3 14)
+    (Tower 3 4 14)
+))
+(echo "Step 15:")
+(get-value(
+    (Tower 1 1 15)
+    (Tower 1 2 15)
+    (Tower 1 3 15)
+    (Tower 1 4 15)
+    (Tower 2 1 15)
+    (Tower 2 2 15)
+    (Tower 2 3 15)
+    (Tower 2 4 15)
+    (Tower 3 1 15)
+    (Tower 3 2 15)
+    (Tower 3 3 15)
+    (Tower 3 4 15)
+))
